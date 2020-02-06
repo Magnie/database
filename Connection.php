@@ -599,7 +599,13 @@ class Connection implements ConnectionInterface
             if ($value instanceof DateTimeInterface) {
                 $bindings[$key] = $value->format($grammar->getDateFormat());
             } elseif (is_bool($value)) {
-                $bindings[$key] = (int) $value;
+                if ($this->getDriverName() == 'pgsql') {
+                    // When setting a Postgres 'boolean' column, use real true
+                    // or false instead of an integer.
+                    $bindings[$key] = $value;
+                } else {
+                    $bindings[$key] = (int) $value;
+                }
             }
         }
 
